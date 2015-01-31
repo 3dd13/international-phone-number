@@ -48,15 +48,25 @@ angular.module("internationalPhoneNumber", []).directive 'internationalPhoneNumb
       element.intlTelInput('loadUtils', '/bower_components/intl-tel-input/lib/libphonenumber/build/utils.js')
 
     ctrl.$parsers.push (value) ->
-      return value if !value
-      value.replace(/[^\d]/g, '')
+      return value  unless value
+      value = value.replace(/[^\d]/g, "")
+      if options.nationalMode
+        countryCode: element.intlTelInput("getSelectedCountryData")
+        phoneNumber: value
+      else
+        value
 
     ctrl.$parsers.push (value) ->
       if value
-        ctrl.$setValidity 'international-phone-number', element.intlTelInput("isValidNumber")
+        ctrl.$setValidity "international-phone-number", element.intlTelInput("isValidNumber")
       else
-        value = ''
-        delete ctrl.$error['international-phone-number']
+        if options.nationalMode
+          value =
+            countryCode: element.intlTelInput("getSelectedCountryData")
+            phoneNumber: ""
+        else
+          value = ""
+        delete ctrl.$error["international-phone-number"]
       value
 
     element.on 'blur keyup change', (event) ->
